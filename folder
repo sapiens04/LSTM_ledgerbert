@@ -1,0 +1,57 @@
+realtime-crypto-trading-pipeline/
+├── .env.example               # File mẫu chứa API Key (Binance, Reddit, Telegram Token)
+├── .gitignore                 # Chặn file data nặng (.csv, .json), trọng số (.pth) và .env
+├── docker-compose.yaml        # Triển khai hạ tầng (Kafka, Zookeeper, Spark, DB)
+├── README.md                  # Hướng dẫn deploy và chạy pipeline
+├── requirements.txt           # Danh sách thư viện Python (pyspark, confluent-kafka, torch, transformers)
+│
+├── deployments/               # KHU VỰC TRIỂN KHAI HẠ TẦNG
+│   ├── docker/
+│   │   ├── data/              # NƠI CHỨA DATA CỦA KAFKA/DB (Gắn ổ NTFS Windows bằng Bind Mount)
+│   │   │   ├── kafka/
+│   │   │   └── zookeeper/
+│   │   ├── Dockerfile.consumer
+│   │   └── Dockerfile.producer
+│   └── airflow/               # DAGs lập lịch train lại AI model theo chu kỳ (nếu có)
+│       └── dags/
+│           └── retrain_ai_model.py
+│
+└── src/                       # KHU VỰC CHỨA SOURC CODE CỐT LÕI
+    │
+    ├── common/                # Module dùng chung cho toàn bộ hệ thống
+    │   ├── __init__.py
+    │   ├── config.py          # Đọc biến môi trường từ file .env (settings.py)
+    │   ├── database.py        # Kết nối Storage/Database (MinIO, MongoDB, MySQL)
+    │   └── spark_session.py   # Khởi tạo Spark Session cấu hình chuẩn tối ưu
+    │
+    ├── components/            # LÕI XỬ LÝ DỮ LIỆU & AI (CORE LOGIC)
+    │   ├── __init__.py
+    │   ├── preprocessing.py   # Clean text Reddit, chuẩn hóa dữ liệu giá (MinMaxScale)
+    │   └── models.py          # Định nghĩa cấu trúc mạng LSTM, BiLSTM và class Load LedgerBERT/FinBERT
+    │
+    ├── batch_ai_system/       # NHÁNH 1: HUẤN LUYỆN MÔ HÌNH (BATCH PIPELINE)
+    │   ├── __init__.py
+    │   ├── data/              # Chỉ lưu trữ file dữ liệu mẫu/nhỏ để test
+    │   │   ├── raw/           # Dữ liệu thô cào về để train
+    │   │   └── processed/     # Dữ liệu sạch sau khi qua components/preprocessing.py
+    │   ├── weights/           # NƠI LƯU TRỌNG SỐ MODEL (*.pth, *.h5) -> PHẢI ĐƯA VÀO GITIGNORE
+    │   ├── train_lstm.py      # Script chạy train mô hình dự báo giá chuỗi thời gian
+    │   └── train_sentiment.py # Script chạy tinh chỉnh (Fine-tune) LedgerBERT/FinBERT
+    │
+    ├── streaming_system/      # NHÁNH 2: XỬ LÝ LUỒNG TRỰC TUYẾN (REAL-TIME PIPELINE)
+    │   ├── __init__.py
+    │   │
+    │   ├── producers/         # Lấy dữ liệu Real-time đẩy vào Kafka Topics
+    │   │   ├── binance_producer.py # Kết nối WebSocket Binance -> Kafka Topic `crypto-prices`
+    │   │   └── reddit_producer.py  # Stream bài đăng Reddit (PRAW API) -> Kafka Topic `reddit-posts`
+    │   │
+    │   └── consumers/         # Đọc luồng, dự báo bằng AI, ghi dữ liệu và bắn Alert
+    │       ├── spark_stream_processor.py # Spark Structured Streaming đọc 2 Topics -> Join Luồng
+    │       ├── sentiment_analyzer.py     # Gọi model BERT để chấm điểm sắc thái bài đăng real-time
+    │       ├── price_predictor.py        # Gọi model LSTM để dự báo xu hướng giá dựa trên cửa sổ thời gian (Window)
+    │       └── telegram_notifier.py      # Script nhận tín hiệu từ Spark/Consumer -> Bắn thông báo qua Tele Bot
+    │
+    └── visualization/         # HỆ THỐNG TRỰC QUAN HÓA (DASHBOARD)
+        ├── __init__.py
+        ├── app.py             # Dashboard hiển thị biểu đồ real-time (Streamlit hoặc Dash)
+        └── charts.py          # Vẽ các biểu đồ kỹ thuật (EMA, RSI, Sentiment Score)

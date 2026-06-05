@@ -1,0 +1,9 @@
+# Bỏ qua môi trường ảo và thư mục build
+.venv_da2/
+__pycache__/
+
+# Bỏ qua file chứa mật khẩu, key API
+.env
+
+# Bỏ qua thư mục chứa data nặng của Docker (nếu có vô tình tạo trong thư mục gốc)
+docker_data/
