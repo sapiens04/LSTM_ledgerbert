@@ -3,11 +3,15 @@ FROM python:3.11
 ENV PYTHONPATH "${PYTHONPATH}:/app"
 
 WORKDIR /app
+# 1. CHỈ copy file requirements.txt vào trước
+COPY requirements.txt .
 
+# 2. Cài đặt thư viện (Bước này sẽ được cache lại nếu requirements.txt không đổi)
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 3. Copy toàn bộ code vào sau cùng
 COPY . /app
-
-RUN pip install -r requirements.txt
 
 EXPOSE 80
 
-CMD ["python3", "src/producer/producer.py"]
+CMD ["python3", "src/streaming_system/producers/producer.py"]   

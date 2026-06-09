@@ -8,11 +8,11 @@ from pyspark.sql.types import (
     StructType,
 )
 
-from src.common.emotion_analysis import EmotionAnalyzer
+
 from src.common.sentiment_analysis import SentimentAnalyzer
 from src.common.spark_session import create_spark_context
 from src.config.settings import settings
-from src.consumer.kafka.kafka_stream_reader import KakfaStreamReader
+from src.consumer.kafka.kafka_stream_reader import KafkaStreamReader
 from src.consumer.preprocessing.clean_text import CleanText
 from src.consumer.preprocessing.preprocessor import Preprocessor
 
@@ -22,7 +22,7 @@ class RedditConsumer:
     def __init__(
         self,
         spark: SparkSession,
-        kafka_stream_reader: KakfaStreamReader,
+        kafka_stream_reader: KafkaStreamReader,
         preprocessor: Preprocessor,
     ) -> None:
         self.spark = spark
@@ -57,19 +57,18 @@ if __name__ == "__main__":
         settings.DB_PORT,
         settings.DB_DATABASE,
     )
-    kafka_stream_reader = KakfaStreamReader(
+    kafka_stream_reader = KafkaStreamReader(
         spark, settings.KAFKA_HOST, settings.KAFKA_PORT, settings.KAFKA_TOPIC
     )
     clean_text = CleanText()
     sentiment_analyzer = SentimentAnalyzer()
-    emotion_analyzer = EmotionAnalyzer()
-    preprocessor = Preprocessor(clean_text, sentiment_analyzer, emotion_analyzer)
+    preprocessor = Preprocessor(clean_text, sentiment_analyzer)
     consumer = RedditConsumer(spark, kafka_stream_reader, preprocessor)
     cleaned_df = consumer.process_stream()
 
     mongodb_uri = f"mongodb://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_DATABASE}.redditstream"
     cleaned_df.writeStream.outputMode("append").foreachBatch(
-        lambda batch_df, epoch_id: batch_df.write.format("mongo")
+        lambda batch_df, epoch_id: batch_df.write.format("mongodb")
         .mode("append")
         .option("uri", mongodb_uri)
         .save()

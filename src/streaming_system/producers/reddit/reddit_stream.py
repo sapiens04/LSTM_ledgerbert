@@ -21,33 +21,43 @@ class RedditRapidAPIStream:
             "X-RapidAPI-Host": rapidapi_host
         }
         # URL Endpoint lấy bài viết mới nhất của một Subreddit (Thay đổi tùy theo API cụ thể bạn mua trên RapidAPI, đây là định dạng phổ biến nhất)
-        self.url = f"https://{rapidapi_host}/r/{subreddit}/new"
-        
+        self.url = f"https://{rapidapi_host}/getPostsBySubreddit"
         # Set để lưu các ID bài viết đã gửi, tránh đẩy trùng lặp dữ liệu vào Kafka khi lặp vòng
         self.sent_submission_ids = set()
 
     def fetch_and_stream(self):
-        logging.info(f"🚀 Bắt đầu luồng quét bài viết mới từ r/{self.subreddit}...")
+        logging.info(f"Bắt đầu luồng quét bài viết mới từ r/{self.subreddit}...")
         
         while True:
             try:
                 # 1. Gọi đến đúng endpoint endpoint v1/subreddit/new hiển thị trên màn hình của bạn
                 # Thêm tham số query 'subreddit' vào params nếu API yêu cầu truyền tên sub qua param
-                params = {"subreddit": self.subreddit} 
+                params = {
+                    "subreddit": self.subreddit, 
+                    "sort": "new",
+                    "limit": 100
+                }
                 response = requests.get(self.url, headers=self.headers, params=params, timeout=10)
                 
                 if response.status_code == 200:
                     data = response.json()
                     
                     # 2. BÓC TÁCH THEO ĐÚNG MÀN HÌNH: Lấy mảng nằm trong key 'body'
-                    submissions = data.get("body", [])
+                    # submissions = data.get("body", [])
+                    root_data = data.get("data", {}) 
+                    posts_list = root_data.get("posts", [])
                     
                     new_count = 0
-                    for submission in submissions:
+                    for item in posts_list:
+                        submission = item.get("data", {})
                         sub_id = submission.get("id")
                         
                         # Kiểm tra trùng lặp để tránh xả data lặp vào Kafka
                         if sub_id and sub_id not in self.sent_submission_ids:
+                            title = submission.get("title", "No Title") # Lấy title
+                            
+                            # THÊM DÒNG NÀY ĐỂ DEBUG:
+                            logging.info(f"👉 Đang đẩy bài: {title[:10]}...")
                             submission_data = {
                                 "id": sub_id,
                                 "title": submission.get("title", ""),
@@ -58,7 +68,7 @@ class RedditRapidAPIStream:
                                 "created_at": submission.get("created_utc", time.time()) # Nếu thiếu trường lấy tạm thời gian hiện tại
                             }
                             
-                            # Ép sang kiểu JSON chuỗi và encode sang utf-8 cho Kafka gặm
+                            # Ép sang kiểu JSON chuỗi và encode sang utf-8 cho Kafka
                             message = json.dumps(submission_data).encode("utf8")
                             
                             # Bắn trực tiếp vào Kafka Topic
@@ -68,19 +78,20 @@ class RedditRapidAPIStream:
                             
                     if new_count > 0:
                         self.kafka_producer.flush()
-                        logging.info(f"📥 [RapidAPI] Đã đẩy thêm {new_count} bài viết mới từ r/{self.subreddit} vào Kafka.")
+                        logging.info(f"[RapidAPI] Đã đẩy thêm {new_count} bài viết mới từ r/{self.subreddit} vào Kafka.")
                         
                     if len(self.sent_submission_ids) > 5000:
                         self.sent_submission_ids.clear()
                         
                 else:
-                    logging.error(f"❌ Lỗi API: Status {response.status_code} - {response.text}")
+                    logging.error(f"Lỗi API: Status {response.status_code} - {response.text}")
                     
             except Exception as e:
-                logging.error(f"❌ Lỗi xử lý luồng: {e}")
+                logging.error(f"Lỗi xử lý luồng: {e}")
                 
-            # Nghỉ 20-30 giây giữa các đợt quét để bảo vệ quota tài khoản
-            time.sleep(20)
+            sleep_time = 10
+            logging.info(f"Đang đợi {sleep_time} giây cho đợt quét tiếp theo...")
+            time.sleep(sleep_time)
 
 if __name__ == "__main__":
     # Nạp các biến môi trường
@@ -94,16 +105,16 @@ if __name__ == "__main__":
     KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
     
     if not RAPIDAPI_KEY:
-        logging.critical("❌ Thiếu cấu hình RAPIDAPI_KEY trong file .env! Hệ thống dừng.")
+        logging.critical("Thiếu cấu hình RAPIDAPI_KEY trong file .env! Hệ thống dừng.")
         exit(1)
         
     # Khởi tạo Confluent Kafka Producer thật
     try:
         producer_config = {'bootstrap.servers': KAFKA_BOOTSTRAP_SERVERS}
         kafka_producer = Producer(producer_config)
-        logging.info("✅ Khởi tạo Kafka Producer thành công.")
+        logging.info("Khởi tạo Kafka Producer thành công.")
     except Exception as e:
-        logging.critical(f"❌ Không thể kết nối tới Kafka Broker: {e}")
+        logging.critical(f"Không thể kết nối tới Kafka Broker: {e}")
         exit(1)
         
     # Chạy luồng stream

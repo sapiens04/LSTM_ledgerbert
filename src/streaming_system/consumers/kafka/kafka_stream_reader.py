@@ -3,7 +3,7 @@ from pyspark.sql.functions import from_json
 from pyspark.sql.types import StructType
 
 
-class KakfaStreamReader:
+class KafkaStreamReader:
     def __init__(
         self, spark: SparkSession, kafka_host: str, kafka_port: int, kafka_topic: str
     ) -> None:

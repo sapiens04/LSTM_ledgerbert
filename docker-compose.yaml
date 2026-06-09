@@ -39,6 +39,7 @@ services:
     image: confluentinc/cp-zookeeper:7.5.0
     hostname: zookeeper
     container_name: zookeeper
+    user: root
     ports:
       - "2181:2181"
     environment:
@@ -59,6 +60,7 @@ services:
     image: confluentinc/cp-server:7.5.0
     hostname: broker
     container_name: broker
+    user: root
     depends_on:
       zookeeper:
         condition: service_healthy
@@ -163,7 +165,7 @@ services:
       broker:
         condition: service_healthy
     env_file:
-     - .env
+     - .env.docker
   consumer:
     build:
       context: .
@@ -177,5 +179,5 @@ services:
       spark:
         condition: service_healthy
     env_file:
-     - .env
+     - .env.docker
 
