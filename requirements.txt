@@ -1,0 +1,33 @@
+# ==============================================================================
+# LAYER 1: DATA PIPELINE & BASE INFRASTRUCTURE (Dữ liệu & Hạ tầng)
+# ==============================================================================
+ccxt==4.2.82
+pandas==2.2.1
+numpy==1.26.4
+python-dotenv==1.0.1
+python-dateutil==2.9.0
+requests==2.31.0
+pydantic-settings==2.14.1
+
+# ==============================================================================
+# LAYER 2: BIG DATA & STREAMING (Kafka & PySpark Structured Streaming)
+# ==============================================================================
+confluent-kafka==2.3.0
+pyspark==3.4.1
+pyarrow==15.0.0
+
+# ==============================================================================
+# LAYER 3: DEEP LEARNING & AI CORE (Mô hình BiLSTM & LedgerBERT/FinBERT)
+# ==============================================================================
+# Lưu ý: Thư viện PyTorch lõi sẽ được cài đặt riêng tùy theo cấu hình GPU/CPU ở Bước 3
+transformers==4.38.2
+scikit-learn==1.4.1.post1
+tqdm==4.66.2
+nltk==3.8.1
+accelerate==0.27.2
+
+# ==============================================================================
+# LAYER 4: ALERT SYSTEM & UTILITIES (Hệ thống thông báo & Tiện ích)
+# ==============================================================================
+python-telegram-bot==20.8
+praw==7.7.1

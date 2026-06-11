@@ -1,28 +1,28 @@
 FROM python:3.11
 
-# 1. Cài đặt Java (cho PySpark) và dọn dẹp cache của apt-get để giảm dung lượng image
+# 1. Cài đặt Java (cho PySpark) và dọn dẹp cache để giảm dung lượng image
 RUN apt-get update && apt-get install -y default-jre && \
     rm -rf /var/lib/apt/lists/*
 
 ENV PYTHONPATH "${PYTHONPATH}:/app"
-# 2. Sửa lỗi cú pháp: Dòng cũ của bạn bị dính chữ "ADD . $NLTK_DATA". 
-# Đồng thời trỏ luôn thư mục NLTK_DATA về đúng nơi bạn sẽ tải data ở bước dưới.
 ENV NLTK_DATA="/usr/share/nltk_data"
 
 WORKDIR /app
 
-# 3. CHỈ copy file requirements và cài đặt thư viện trước để tận dụng cache
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir pyspark
+# 👉 BƯỚC SỬA QUAN TRỌNG: Copy file requirements.txt vào trước để phục vụ lệnh pip ở dưới
+COPY requirements.txt /app/
 
-# 4. Tải data cho NLTK (Đặt ở đây để khi bạn sửa code, nó KHÔNG phải mất công tải lại models)
+# 3. Cài đặt toàn bộ thư viện (Gộp chung lại để giảm số lượng layer, tối ưu image)
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir pyspark
+
+# 4. Tải data cho NLTK
 RUN python3 -m nltk.downloader punkt -d /usr/share/nltk_data
 RUN python3 -m nltk.downloader stopwords -d /usr/share/nltk_data
 
-# 5. Copy toàn bộ source code vào sau cùng
+# 5. Copy toàn bộ source code của dự án vào sau cùng
 COPY . /app
 
 EXPOSE 80
 
-CMD ["python3", "src/streaming_system/consumer/consumer.py"]
+CMD ["python3", "src/streaming_system/consumers/consumer.py"]

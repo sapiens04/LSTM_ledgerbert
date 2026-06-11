@@ -9,12 +9,12 @@ from pyspark.sql.types import (
 )
 
 
-from src.common.sentiment_analysis import SentimentAnalyzer
+
 from src.common.spark_session import create_spark_context
-from src.config.settings import settings
-from src.consumer.kafka.kafka_stream_reader import KafkaStreamReader
-from src.consumer.preprocessing.clean_text import CleanText
-from src.consumer.preprocessing.preprocessor import Preprocessor
+from src.common.settings import settings
+from src.streaming_system.consumers.kafka.kafka_stream_reader import KafkaStreamReader
+from src.streaming_system.consumers.preprocessing.clean_text import CleanText
+from src.streaming_system.consumers.preprocessing.preprocessor import Preprocessor
 
 
 class RedditConsumer:
@@ -61,8 +61,8 @@ if __name__ == "__main__":
         spark, settings.KAFKA_HOST, settings.KAFKA_PORT, settings.KAFKA_TOPIC
     )
     clean_text = CleanText()
-    sentiment_analyzer = SentimentAnalyzer()
-    preprocessor = Preprocessor(clean_text, sentiment_analyzer)
+
+    preprocessor = Preprocessor(clean_text)
     consumer = RedditConsumer(spark, kafka_stream_reader, preprocessor)
     cleaned_df = consumer.process_stream()
 

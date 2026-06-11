@@ -89,7 +89,7 @@ class RedditRapidAPIStream:
             except Exception as e:
                 logging.error(f"Lỗi xử lý luồng: {e}")
                 
-            sleep_time = 10
+            sleep_time = 3600
             logging.info(f"Đang đợi {sleep_time} giây cho đợt quét tiếp theo...")
             time.sleep(sleep_time)
 

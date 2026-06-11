@@ -1,0 +1,16 @@
+# Loại bỏ môi trường ảo Python local
+.venv/
+venv/
+env/
+
+# Loại bỏ kho lưu trữ dữ liệu tạm của Kafka/Mongo/Spark
+data-logs/
+
+# Loại bỏ bộ nhớ đệm python và log
+**/__pycache__/
+*.log
+
+# Loại bỏ các file model nặng nếu bạn để trong thư mục src
+**/models/*.pt
+**/models/*.bin
+.git/

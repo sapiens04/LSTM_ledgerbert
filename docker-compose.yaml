@@ -33,7 +33,7 @@
 #     driver: bridge
 
 
-version: "2.1"
+# version: "2.1"
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -53,8 +53,8 @@ services:
       retries: 5
       start_period: 10s
     volumes:
-      - ${EXTERNAL_DATA_PATH}/zookeeper-data:/var/lib/zookeeper/data
-      - ${EXTERNAL_DATA_PATH}/zookeeper-logs:/var/lib/zookeeper/log
+      - ./data-logs/zookeeper-data:/var/lib/zookeeper/data
+      - ./data-logs/zookeeper-logs:/var/lib/zookeeper/log
 
   broker:
     image: confluentinc/cp-server:7.5.0
@@ -72,6 +72,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
@@ -89,8 +90,8 @@ services:
       retries: 5
       start_period: 15s
     volumes:
-      - ${EXTERNAL_DATA_PATH}/kafka-data:/var/lib/kafka/data
-      - ${EXTERNAL_DATA_PATH}/kafka-logs:/var/lib/kafka/log
+      - ./data-logs/kafka-data:/var/lib/kafka/data
+      - ./data-logs/kafka-logs:/var/lib/kafka/log
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:7.5.0
@@ -110,29 +111,37 @@ services:
       PORT: 9021
     restart: unless-stopped
 
-  spark:
-    image: docker.io/bitnami/spark:3
+  spark-master:
+    image: apache/spark:3.5.1
     container_name: spark_master
     hostname: spark_master
     user: root
-    environment:
-      - SPARK_MODE=master
-      - SPARK_RPC_AUTHENTICATION_ENABLED=no
-      - SPARK_RPC_ENCRYPTION_ENABLED=no
-      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
-      - SPARK_SSL_ENABLED=no
     ports:
-      - "8080:8080"
-      - "7077:7077"
+      - "8081:8080" # Web UI
+      - "7077:7077" # Cổng kết nối nội bộ
+    # Dùng lệnh này để ép nó làm Master thay vì dùng biến môi trường
     restart: unless-stopped
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080 || exit 1"]
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
     volumes:
-      - ${EXTERNAL_DATA_PATH}/spark-data:/bitnami/spark
+      - ./data-logs/spark-master-data:/opt/spark/work
+
+  spark-worker:
+    image: apache/spark:3.5.1
+    container_name: spark_worker
+    user: root
+    depends_on:
+      spark-master:
+        condition: service_healthy
+    # Lệnh gọi Worker và chỉ đường cho nó kết nối về Master qua cổng 7077
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    volumes:
+      - ./data-logs/spark-worker-data:/opt/spark/work
 
   mongodb:
     image: mongo:latest
@@ -153,7 +162,7 @@ services:
       retries: 3
       start_period: 5s
     volumes:
-      - ${EXTERNAL_DATA_PATH}/mongodb-data:/data/db
+      - /home/dung/study/mongo_data_crypto:/data/db
       - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
   producer:
@@ -165,7 +174,7 @@ services:
       broker:
         condition: service_healthy
     env_file:
-     - .env.docker
+     - .env
   consumer:
     build:
       context: .
@@ -176,8 +185,8 @@ services:
         condition: service_healthy
       mongodb:
         condition: service_healthy
-      spark:
+      spark-master:
         condition: service_healthy
     env_file:
-     - .env.docker
+     - .env
 
