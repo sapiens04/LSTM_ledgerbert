@@ -1,0 +1,35 @@
+# Stage 1: Lấy Java 17 JRE từ Eclipse Temurin
+FROM eclipse-temurin:17-jre AS jre
+
+# Stage 2: Image chính chạy ứng dụng
+FROM python:3.11-slim   # thêm slim để giảm size, bỏ bớt tool không cần
+
+# Copy Java từ stage jre
+COPY --from=jre /opt/java/openjdk /opt/java/openjdk
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH="$JAVA_HOME/bin:$PATH"
+
+# Thiết lập môi trường Python
+ENV PYTHONPATH="/app"
+ENV NLTK_DATA="/usr/share/nltk_data"
+
+WORKDIR /app
+
+# Copy và cài dependencies trước để cache
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Tải dữ liệu NLTK
+RUN python3 -m nltk.downloader punkt stopwords -d /usr/share/nltk_data
+
+# Copy source code vào sau cùng
+COPY . .
+
+# Tạo user không root (tuỳ chọn)
+RUN useradd -m -u 1000 appuser && chown -R appuser /app /usr/share/nltk_data
+USER appuser
+
+# Cổng nếu có web service, còn consumer thì bỏ
+# EXPOSE 80
+
+CMD ["python3", "src/streaming_system/consumers/consumer.py"]

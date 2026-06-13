@@ -1,0 +1,28 @@
+FROM python:3.11
+
+# 1. Cài đặt Java (cho PySpark) và dọn dẹp cache để giảm dung lượng image
+RUN apt-get update && apt-get install -y openjdk-17-jre-headless && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV PYTHONPATH "${PYTHONPATH}:/app"
+ENV NLTK_DATA="/usr/share/nltk_data"
+
+WORKDIR /app
+
+# 👉 BƯỚC SỬA QUAN TRỌNG: Copy file requirements.txt vào trước để phục vụ lệnh pip ở dưới
+COPY requirements.txt /app/
+
+# 3. Cài đặt toàn bộ thư viện (Gộp chung lại để giảm số lượng layer, tối ưu image)
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir pyspark
+
+# 4. Tải data cho NLTK
+RUN python3 -m nltk.downloader punkt -d /usr/share/nltk_data
+RUN python3 -m nltk.downloader stopwords -d /usr/share/nltk_data
+
+# 5. Copy toàn bộ source code của dự án vào sau cùng
+COPY . /app
+
+EXPOSE 80
+
+CMD ["python3", "src/streaming_system/consumers/consumer.py"]

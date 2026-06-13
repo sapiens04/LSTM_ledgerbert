@@ -7,3 +7,5 @@ __pycache__/
 
 # Bỏ qua thư mục chứa data nặng của Docker (nếu có vô tình tạo trong thư mục gốc)
 docker_data/
+data-logs/
+scripts/
