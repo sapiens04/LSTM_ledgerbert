@@ -1,0 +1,60 @@
+[2026-06-23T15:52:46.990+0000] {taskinstance.py:1157} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: daily_crypto_lstm_pipeline.prepare_data scheduled__2026-06-21T00:02:00+00:00 [queued]>
+[2026-06-23T15:52:47.001+0000] {taskinstance.py:1157} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: daily_crypto_lstm_pipeline.prepare_data scheduled__2026-06-21T00:02:00+00:00 [queued]>
+[2026-06-23T15:52:47.002+0000] {taskinstance.py:1359} INFO - Starting attempt 1 of 3
+[2026-06-23T15:52:47.019+0000] {taskinstance.py:1380} INFO - Executing <Task(_PythonDecoratedOperator): prepare_data> on 2026-06-21 00:02:00+00:00
+[2026-06-23T15:52:47.051+0000] {standard_task_runner.py:57} INFO - Started process 219 to run task
+[2026-06-23T15:52:47.055+0000] {standard_task_runner.py:84} INFO - Running: ['***', 'tasks', 'run', 'daily_crypto_lstm_pipeline', 'prepare_data', 'scheduled__2026-06-21T00:02:00+00:00', '--job-id', '23', '--raw', '--subdir', 'DAGS_FOLDER/binance_daily_dag.py', '--cfg-path', '/tmp/tmpiw712sdc']
+[2026-06-23T15:52:47.063+0000] {standard_task_runner.py:85} INFO - Job 23: Subtask prepare_data
+[2026-06-23T15:52:47.150+0000] {task_command.py:415} INFO - Running <TaskInstance: daily_crypto_lstm_pipeline.prepare_data scheduled__2026-06-21T00:02:00+00:00 [running]> on host c977fc9c78e3
+[2026-06-23T15:52:47.264+0000] {taskinstance.py:1660} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='dung_hust' AIRFLOW_CTX_DAG_ID='daily_crypto_lstm_pipeline' AIRFLOW_CTX_TASK_ID='prepare_data' AIRFLOW_CTX_EXECUTION_DATE='2026-06-21T00:02:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2026-06-21T00:02:00+00:00'
+[2026-06-23T15:53:48.427+0000] {taskinstance.py:1935} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.10/site-packages/airflow/decorators/base.py", line 221, in execute
+    return_value = super().execute(context)
+  File "/home/airflow/.local/lib/python3.10/site-packages/airflow/operators/python.py", line 192, in execute
+    return_value = self.execute_callable()
+  File "/home/airflow/.local/lib/python3.10/site-packages/airflow/operators/python.py", line 209, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+  File "/opt/airflow/dags/binance_daily_dag.py", line 29, in prepare_data
+    return fetch_and_prepare_features()
+  File "/opt/airflow/dags/predict_daily.py", line 74, in fetch_and_prepare_features
+    mongo_raw = list(db[col_name].find({"created_at": {"$gte": fifty_days_ago_str}}))
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/synchronous/cursor.py", line 1166, in __next__
+    return self.next()
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/synchronous/cursor.py", line 1142, in next
+    if len(self._data) or self._refresh():
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/synchronous/cursor.py", line 1090, in _refresh
+    self._send_message(q)
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/synchronous/cursor.py", line 985, in _send_message
+    response = client._run_operation(
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/_csot.py", line 125, in csot_wrapper
+    return func(self, *args, **kwargs)
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/synchronous/mongo_client.py", line 1956, in _run_operation
+    return self._retryable_read(
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/synchronous/mongo_client.py", line 2076, in _retryable_read
+    return self._retry_internal(
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/_csot.py", line 125, in csot_wrapper
+    return func(self, *args, **kwargs)
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/synchronous/mongo_client.py", line 2038, in _retry_internal
+    ).run()
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/synchronous/mongo_client.py", line 2811, in run
+    res = self._read() if self._is_read else self._write()
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/synchronous/mongo_client.py", line 3027, in _read
+    self._server = self._get_server()
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/synchronous/mongo_client.py", line 2975, in _get_server
+    return self._client._select_server(
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/synchronous/mongo_client.py", line 1851, in _select_server
+    server = topology.select_server(
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/synchronous/topology.py", line 428, in select_server
+    server = self._select_server(
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/synchronous/topology.py", line 402, in _select_server
+    servers = self.select_servers(
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/synchronous/topology.py", line 298, in select_servers
+    server_descriptions = self._select_servers_loop(
+  File "/home/airflow/.local/lib/python3.10/site-packages/pymongo/synchronous/topology.py", line 359, in _select_servers_loop
+    raise ServerSelectionTimeoutError(
+pymongo.errors.ServerSelectionTimeoutError: mongodb:27017: [Errno -2] Name or service not known (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms), Timeout: 30s, Topology Description: <TopologyDescription id: 6a3aabcfc4241b82aac69559, topology_type: Unknown, servers: [<ServerDescription ('mongodb', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('mongodb:27017: [Errno -2] Name or service not known (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms)')>]>
+[2026-06-23T15:53:48.486+0000] {taskinstance.py:1398} INFO - Marking task as UP_FOR_RETRY. dag_id=daily_crypto_lstm_pipeline, task_id=prepare_data, execution_date=20260621T000200, start_date=20260623T155246, end_date=20260623T155348
+[2026-06-23T15:53:48.501+0000] {standard_task_runner.py:104} ERROR - Failed to execute job 23 for task prepare_data (mongodb:27017: [Errno -2] Name or service not known (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms), Timeout: 30s, Topology Description: <TopologyDescription id: 6a3aabcfc4241b82aac69559, topology_type: Unknown, servers: [<ServerDescription ('mongodb', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('mongodb:27017: [Errno -2] Name or service not known (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms)')>]>; 219)
+[2026-06-23T15:53:48.556+0000] {local_task_job_runner.py:228} INFO - Task exited with return code 1
+[2026-06-23T15:53:48.581+0000] {taskinstance.py:2776} INFO - 0 downstream tasks scheduled from follow-on schedule check

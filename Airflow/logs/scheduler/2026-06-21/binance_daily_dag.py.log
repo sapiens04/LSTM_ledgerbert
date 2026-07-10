@@ -1,0 +1,10 @@
+[2026-06-21T04:18:41.726+0000] {processor.py:157} INFO - Started process (PID=19808) to work on /opt/airflow/dags/binance_daily_dag.py
+[2026-06-21T04:18:41.739+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/binance_daily_dag.py for tasks to queue
+[2026-06-21T04:18:41.744+0000] {logging_mixin.py:151} INFO - [2026-06-21T04:18:41.742+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/binance_daily_dag.py
+[2026-06-21T04:18:56.642+0000] {processor.py:839} INFO - DAG(s) dict_keys(['daily_crypto_lstm_pipeline']) retrieved from /opt/airflow/dags/binance_daily_dag.py
+[2026-06-21T04:18:56.962+0000] {logging_mixin.py:151} INFO - [2026-06-21T04:18:56.961+0000] {dag.py:2915} INFO - Sync 1 DAGs
+[2026-06-21T04:18:57.149+0000] {logging_mixin.py:151} INFO - [2026-06-21T04:18:57.148+0000] {dag.py:3696} INFO - Setting next_dagrun for daily_crypto_lstm_pipeline to 2026-06-21T00:02:00+00:00, run_after=2026-06-22T00:02:00+00:00
+[2026-06-21T04:18:57.396+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/binance_daily_dag.py took 15.695 seconds
+[2026-06-21T04:19:28.815+0000] {processor.py:157} INFO - Started process (PID=19847) to work on /opt/airflow/dags/binance_daily_dag.py
+[2026-06-21T04:19:28.884+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/binance_daily_dag.py for tasks to queue
+[2026-06-21T04:19:28.919+0000] {logging_mixin.py:151} INFO - [2026-06-21T04:19:28.913+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/binance_daily_dag.py

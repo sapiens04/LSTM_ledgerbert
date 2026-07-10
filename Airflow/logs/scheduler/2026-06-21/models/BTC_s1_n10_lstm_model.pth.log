@@ -1,0 +1,5 @@
+[2026-06-21T04:19:02.984+0000] {processor.py:157} INFO - Started process (PID=19826) to work on /opt/airflow/dags/models/BTC_s1_n10_lstm_model.pth
+[2026-06-21T04:19:02.991+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/models/BTC_s1_n10_lstm_model.pth for tasks to queue
+[2026-06-21T04:19:03.008+0000] {logging_mixin.py:151} INFO - [2026-06-21T04:19:03.007+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/models/BTC_s1_n10_lstm_model.pth
+[2026-06-21T04:19:03.149+0000] {processor.py:841} WARNING - No viable dags retrieved from /opt/airflow/dags/models/BTC_s1_n10_lstm_model.pth
+[2026-06-21T04:19:03.227+0000] {processor.py:179} INFO - Processing /opt/airflow/dags/models/BTC_s1_n10_lstm_model.pth took 0.307 seconds

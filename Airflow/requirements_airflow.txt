@@ -1,0 +1,9 @@
+requests
+numpy==2.2.6
+pandas==2.2.1
+joblib
+torch==2.4.1
+pymongo
+scikit-learn==1.7.2
+
+

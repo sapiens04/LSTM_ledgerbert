@@ -1,0 +1,3 @@
+[2026-07-03T12:11:43.164+0000] {processor.py:157} INFO - Started process (PID=251) to work on /opt/airflow/dags/binance_daily_dag.py
+[2026-07-03T12:11:43.165+0000] {processor.py:829} INFO - Processing file /opt/airflow/dags/binance_daily_dag.py for tasks to queue
+[2026-07-03T12:11:43.166+0000] {logging_mixin.py:151} INFO - [2026-07-03T12:11:43.166+0000] {dagbag.py:539} INFO - Filling up the DagBag from /opt/airflow/dags/binance_daily_dag.py

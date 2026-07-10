@@ -1,0 +1,78 @@
+[2026-06-21T04:19:30.376+0000] {taskinstance.py:1157} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: daily_crypto_lstm_pipeline.prepare_data scheduled__2026-06-20T00:02:00+00:00 [queued]>
+[2026-06-21T04:19:30.481+0000] {taskinstance.py:1157} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: daily_crypto_lstm_pipeline.prepare_data scheduled__2026-06-20T00:02:00+00:00 [queued]>
+[2026-06-21T04:19:30.483+0000] {taskinstance.py:1359} INFO - Starting attempt 1 of 3
+[2026-06-21T04:19:30.629+0000] {taskinstance.py:1380} INFO - Executing <Task(_PythonDecoratedOperator): prepare_data> on 2026-06-20 00:02:00+00:00
+[2026-06-21T04:19:31.022+0000] {standard_task_runner.py:57} INFO - Started process 19854 to run task
+[2026-06-21T04:19:31.357+0000] {standard_task_runner.py:84} INFO - Running: ['***', 'tasks', 'run', 'daily_crypto_lstm_pipeline', 'prepare_data', 'scheduled__2026-06-20T00:02:00+00:00', '--job-id', '18', '--raw', '--subdir', 'DAGS_FOLDER/binance_daily_dag.py', '--cfg-path', '/tmp/tmpatdfolc7']
+[2026-06-21T04:19:31.387+0000] {standard_task_runner.py:85} INFO - Job 18: Subtask prepare_data
+[2026-06-21T04:19:32.386+0000] {task_command.py:415} INFO - Running <TaskInstance: daily_crypto_lstm_pipeline.prepare_data scheduled__2026-06-20T00:02:00+00:00 [running]> on host c977fc9c78e3
+[2026-06-21T04:19:32.641+0000] {local_task_job_runner.py:115} ERROR - Received SIGTERM. Terminating subprocesses
+[2026-06-21T04:19:32.702+0000] {process_utils.py:131} INFO - Sending 15 to group 19854. PIDs of all processes in the group: [19854]
+[2026-06-21T04:19:32.713+0000] {process_utils.py:86} INFO - Sending the signal 15 to group 19854
+[2026-06-21T04:19:32.719+0000] {taskinstance.py:1630} ERROR - Received SIGTERM. Terminating subprocesses.
+[2026-06-21T04:19:32.866+0000] {taskinstance.py:1935} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.10/site-packages/airflow/models/taskinstance.py", line 1516, in _run_raw_task
+    self._execute_task_with_callbacks(context, test_mode, session=session)
+  File "/home/airflow/.local/lib/python3.10/site-packages/airflow/models/taskinstance.py", line 1638, in _execute_task_with_callbacks
+    self.clear_xcom_data()
+  File "/home/airflow/.local/lib/python3.10/site-packages/airflow/utils/session.py", line 77, in wrapper
+    return func(*args, session=session, **kwargs)
+  File "/home/airflow/.local/lib/python3.10/site-packages/airflow/models/taskinstance.py", line 928, in clear_xcom_data
+    XCom.clear(
+  File "/home/airflow/.local/lib/python3.10/site-packages/airflow/utils/session.py", line 74, in wrapper
+    return func(*args, **kwargs)
+  File "/home/airflow/.local/lib/python3.10/site-packages/airflow/api_internal/internal_api_call.py", line 114, in wrapper
+    return func(*args, **kwargs)
+  File "/home/airflow/.local/lib/python3.10/site-packages/airflow/models/xcom.py", line 643, in clear
+    query.delete()
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/orm/query.py", line 3222, in delete
+    result = self.session.execute(
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/orm/session.py", line 1717, in execute
+    result = conn._execute_20(statement, params or {}, execution_options)
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/engine/base.py", line 1710, in _execute_20
+    return meth(self, args_10style, kwargs_10style, execution_options)
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/elements.py", line 334, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/engine/base.py", line 1569, in _execute_clauseelement
+    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/elements.py", line 532, in _compile_w_cache
+    compiled_sql = self._compiler(
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/elements.py", line 567, in _compiler
+    return dialect.statement_compiler(dialect, self, **kw)
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/compiler.py", line 809, in __init__
+    Compiled.__init__(self, dialect, statement, **kwargs)
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/compiler.py", line 464, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/compiler.py", line 499, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/annotation.py", line 200, in _compiler_dispatch
+    return self.__element.__class__._compiler_dispatch(self, visitor, **kw)
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/visitors.py", line 82, in _compiler_dispatch
+    return meth(self, **kw)
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/compiler.py", line 4372, in visit_delete
+    t = self._generate_delimited_and_list(
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/compiler.py", line 1751, in _generate_delimited_and_list
+    return separator.join(
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/compiler.py", line 1751, in <genexpr>
+    return separator.join(
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/compiler.py", line 1753, in <genexpr>
+    for s in (c._compiler_dispatch(self, **kw) for c in clauses)
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/visitors.py", line 82, in _compiler_dispatch
+    return meth(self, **kw)
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/compiler.py", line 2280, in visit_binary
+    return self._generate_generic_binary(
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/compiler.py", line 2332, in _generate_generic_binary
+    binary.left._compiler_dispatch(
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/annotation.py", line 200, in _compiler_dispatch
+    return self.__element.__class__._compiler_dispatch(self, visitor, **kw)
+  File "/home/airflow/.local/lib/python3.10/site-packages/sqlalchemy/sql/visitors.py", line 77, in _compiler_dispatch
+    meth = getter(visitor)
+  File "/home/airflow/.local/lib/python3.10/site-packages/airflow/models/taskinstance.py", line 1632, in signal_handler
+    raise AirflowException("Task received SIGTERM signal")
+airflow.exceptions.AirflowException: Task received SIGTERM signal
+[2026-06-21T04:19:33.113+0000] {taskinstance.py:1398} INFO - Marking task as UP_FOR_RETRY. dag_id=daily_crypto_lstm_pipeline, task_id=prepare_data, execution_date=20260620T000200, start_date=20260621T041930, end_date=20260621T041933
+[2026-06-21T04:19:33.278+0000] {standard_task_runner.py:104} ERROR - Failed to execute job 18 for task prepare_data (Task received SIGTERM signal; 19854)
+[2026-06-21T04:19:33.377+0000] {process_utils.py:79} INFO - Process psutil.Process(pid=19854, status='terminated', exitcode=1, started='04:19:30') (19854) terminated with exit code 1
+[2026-06-21T04:19:33.378+0000] {local_task_job_runner.py:228} INFO - Task exited with return code 143
+[2026-06-21T04:19:33.499+0000] {taskinstance.py:2776} INFO - 0 downstream tasks scheduled from follow-on schedule check

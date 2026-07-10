@@ -1,0 +1,95 @@
+version: '3.8'
+
+x-airflow-common:
+  &airflow-common
+  build:
+    context: .  # Build context is now the local directory
+    dockerfile: Dockerfile.airflow
+  environment:
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-airflow/airflow
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__CORE__DEFAULT_TIMEZONE: Asia/Ho_Chi_Minh
+    # Hút biến môi trường từ file .env ở máy bạn vào Container
+    TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+    TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
+    MONGO_URI: ${MONGO_URI}
+    MONGO_DB: ${MONGO_DB}
+    MONGO_COLLECTION: ${MONGO_COLLECTION}
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./dags/models:/opt/airflow/models
+    - ./logs:/opt/airflow/logs
+  depends_on:
+    postgres-airflow:
+      condition: service_healthy
+
+services:
+  postgres-airflow:
+    image: postgres:13
+    container_name: postgres-airflow
+    restart: always # Học hỏi từ file mẫu: Tự khởi động lại nếu sập
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+
+  # Init: Chạy 1 lần duy nhất để tạo tài khoản admin cho giao diện Airflow
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow-init
+    command: version
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_DB_UPGRADE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: admin
+      _AIRFLOW_WWW_USER_PASSWORD: admin
+
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow-webserver
+    command: webserver
+    restart: always # Tự động chạy lại
+    ports:
+      - "8080:8080"
+    healthcheck: # Học hỏi từ file mẫu: Check xem web có chết không
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      postgres-airflow:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow-scheduler
+    command: scheduler
+    restart: always # Tự động chạy lại
+    healthcheck: # Học hỏi từ file mẫu: Check xem lõi scheduler có đang hoạt động k
+      test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      postgres-airflow:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+
+# Khai báo sử dụng mạng nội bộ dùng chung (Để Airflow chọc được sang MongoDB)
+networks:
+  default:
+    name: hust_data_network
+    external: true
