@@ -3,8 +3,7 @@ import requests
 from datetime import datetime, timedelta
 from airflow.decorators import dag, task
 
-from predict_daily import fetch_and_prepare_features, run_inference
-from notifications_to_tele import send_telegram_alert
+
 
 
 # local_tz = pendulum.timezone("Asia/Ho_Chi_Minh")
@@ -26,11 +25,13 @@ def daily_prediction_pipeline():
 
     @task()
     def prepare_data():
+        from predict_daily import fetch_and_prepare_features
         return fetch_and_prepare_features()
 
     @task()
     def predict_and_notify(features_list: list):
-      
+        from predict_daily import run_inference
+        from notifications_to_tele import send_telegram_alert
         res = run_inference(features_list)
         send_telegram_alert(res["yesterday_close"], res["pred_usd"])
 

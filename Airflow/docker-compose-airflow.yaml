@@ -17,6 +17,13 @@ x-airflow-common:
     MONGO_URI: ${MONGO_URI}
     MONGO_DB: ${MONGO_DB}
     MONGO_COLLECTION: ${MONGO_COLLECTION}
+    
+    # Giới hạn số luồng (threads) của PyTorch, Numpy, OpenBLAS để tránh Deadlock khi chạy bằng Airflow LocalExecutor
+    OMP_NUM_THREADS: '1'
+    OPENBLAS_NUM_THREADS: '1'
+    MKL_NUM_THREADS: '1'
+    VECLIB_MAXIMUM_THREADS: '1'
+    NUMEXPR_NUM_THREADS: '1'
   volumes:
     - ./dags:/opt/airflow/dags
     - ./dags/models:/opt/airflow/models

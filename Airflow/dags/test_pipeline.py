@@ -1,16 +1,7 @@
 import os
 import sys
 
-# Khắc phục lỗi tương thích khi load scaler/model từ numpy 2.x sang numpy 1.x
-try:
-    import numpy._core
-except ImportError:
-    import numpy.core as _core
-    sys.modules['numpy._core'] = _core
-    import numpy.core.multiarray as _multiarray
-    sys.modules['numpy._core.multiarray'] = _multiarray
-    import numpy.core.numeric as _numeric
-    sys.modules['numpy._core.numeric'] = _numeric
+# Removed numpy hack to avoid duplicate execution crash
 
 from datetime import datetime, timedelta
 import requests
@@ -35,7 +26,7 @@ if os.path.exists(env_path):
 
 from sentiment_score import merge_and_prep_data
 from feature_engineering import calculate_technical_indicators
-from predict_daily import UltimatePaperBiLSTM, run_inference
+from predict_daily import UltimatePaperLSTM, run_inference
 from notifications_to_tele import send_telegram_alert
 
 def run_local_pipeline_test():
@@ -96,12 +87,13 @@ def run_local_pipeline_test():
     print("\n[4] Tính toán các chỉ báo kỹ thuật (RSI, MACD, MA5, MA10, MA20)...")
     try:
         df_features = calculate_technical_indicators(df_merged)
+        df_features.rename(columns={'Sentiment': 'Sentiment_Score'}, inplace=True)
+        # Loại bỏ nến ngày hôm nay (chưa đóng cửa) để lấy nến ngày hôm qua (đóng lúc 7h sáng nay) làm nến cuối cùng
+        df_features = df_features.iloc[:-1]
         print(f"-> Thành công! Shape dữ liệu sau tính toán: {df_features.shape}")
         
         feature_columns = [
-            'Volume', 'Year', 'Month', 'Day', 'MA5', 'MA10', 'MA20', 'RSI', 'MACD',
-            'VWAP', 'SMA', 'Std_dev', 'Upper_band', 'Lower_band', 'ATR',
-            'Close_yes', 'Open_yes', 'High_yes', 'Low_yes', 'Sentiment'
+            'Volume', 'Close', 'Open', 'High', 'Low', 'VWAP', 'Sentiment_Score'
         ]
         # Kiểm tra xem các cột cần thiết có tồn tại không
         missing_cols = [col for col in feature_columns if col not in df_features.columns]
@@ -109,8 +101,8 @@ def run_local_pipeline_test():
             print(f"❌ Lỗi: Thiếu các cột chỉ báo quan trọng: {missing_cols}")
             return
         
-        last_10_days = df_features[feature_columns].tail(10)
-        features_list = last_10_days.values.tolist()
+        last_30_days = df_features[feature_columns].tail(30)
+        features_list = last_30_days.values.tolist()
         print(f"-> Chuẩn bị tensor đầu vào thành công! Kích thước: {len(features_list)}x{len(features_list[0])}")
     except Exception as e:
         print(f"❌ Lỗi tính chỉ báo: {e}")
