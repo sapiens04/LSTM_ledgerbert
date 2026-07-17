@@ -4,16 +4,23 @@
 Airflow/.env
 **/.env
 Airflow/logs/
-Airflow/models
-Airflow/dags/__pycache__
+Airflow/models/
+Airflow/dags/__pycache__/
+
 # Bỏ qua môi trường ảo và thư mục build
+.venv_da2/
+__pycache__/
 LSTM_legberT__crypto/.venv_da2/
-LSTM_legberT__crypto//__pycache__/
+LSTM_legberT__crypto/__pycache__/
 
 # Bỏ qua file chứa mật khẩu, key API
 LSTM_legberT__crypto/.env
 
-# Bỏ qua thư mục chứa data nặng của Docker (nếu có vô tình tạo trong thư mục gốc)
+# Bỏ qua thư mục chứa data nặng của Docker
+docker_data/
+data-logs/
+scripts/
+mongo_data/
 LSTM_legberT__crypto/docker_data/
 LSTM_legberT__crypto/data-logs/
 LSTM_legberT__crypto/scripts/
